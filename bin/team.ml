@@ -39,7 +39,7 @@ let lint () conf year week_range admin_dir =
   let lint_report = Okra.Team.lint admin_dir ~year ~weeks teams in
   Format.printf "%a" Okra.Team.pp_lint_report lint_report
 
-let aggregate () conf year week admin_dir =
+let aggregate () conf year week_range admin_dir =
   let admin_dir =
     match admin_dir with
     | Some x -> x
@@ -51,8 +51,16 @@ let aggregate () conf year week admin_dir =
     | Some f -> Some (Okra.Masterdb.load_csv f)
   in
   let teams = Conf.teams conf in
-  let week = int_of_string (Option.get week) in
-  let report = Okra.Team.aggregate ?okr_db admin_dir ~year ~week teams in
+  let weeks =
+    match String.split_on_char '.' (Option.get week_range) with
+    | [ from; to_ ] ->
+        let from = int_of_string from in
+        let to_ = int_of_string to_ in
+        List.init (to_ - from + 1) (fun x -> from + x)
+    | [ x ] -> [ int_of_string x ]
+    | _ -> failwith "failed to parse weeks argument" (* FIXME: better message *)
+  in
+  let report = Okra.Team.aggregate ?okr_db admin_dir ~year ~weeks teams in
   let pp =
     Okra.Report.pp ~show_time:true ~show_time_calc:false ~show_engineers:true
   in

@@ -31,7 +31,7 @@ val members : t -> Member.t list
 type lint_report
 
 val aggregate :
-  ?okr_db:Masterdb.t -> string -> year:int -> week:int -> t list -> Report.t
+  ?okr_db:Masterdb.t -> string -> year:int -> weeks: int list -> t list -> Report.t
 (** [aggregate admin_dir week teams] aggregates the reports of the teams for the
     given week. *)
 
